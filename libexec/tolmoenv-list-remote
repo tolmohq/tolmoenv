@@ -34,16 +34,17 @@ fi
 
 case "$filter" in
   stable)
-    echo "$releases" | grep -v "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n
+    echo "$releases" | grep -v "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n || true
     ;;
   nightly)
-    echo "$releases" | grep "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n
+    echo "$releases" | grep "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n || true
     ;;
   all)
     # Stable first, then nightly
-    stable="$(echo "$releases" | grep -v "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n)"
-    nightly="$(echo "$releases" | grep "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n)"
+    stable="$(echo "$releases" | grep -v "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n || true)"
+    nightly="$(echo "$releases" | grep "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n || true)"
     [ -n "$stable" ] && echo "$stable"
     [ -n "$nightly" ] && echo "$nightly"
+    true
     ;;
 esac
