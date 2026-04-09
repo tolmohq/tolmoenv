@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TOLMOENV_ROOT="${TOLMOENV_ROOT:-$HOME/.tolmoenv}"
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 source "$TOLMOENV_ROOT/lib/helpers.sh"
 
 [ "$#" -gt 1 ] && log_error "Expected 1 argument" "usage: tolmoenv install [<version>]"
