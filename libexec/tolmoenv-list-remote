@@ -24,7 +24,7 @@ log_debug "Fetching releases from GitHub (filter: $filter)..."
 
 # Fetch all releases (including pre-releases) from GitHub API
 releases="$(curl -fsSL "https://api.github.com/repos/${TOLMOENV_REPO}/releases?per_page=100" \
-  | grep -o '"tag_name":"[^"]*"' \
+  | grep -o '"tag_name": *"[^"]*"' \
   | cut -d'"' -f4 \
   | sed 's/^v//')"
 
