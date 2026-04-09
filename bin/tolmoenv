@@ -2,7 +2,11 @@
 set -euo pipefail
 
 SELF="${BASH_SOURCE[0]}"
-while [ -L "$SELF" ]; do SELF="$(readlink "$SELF")"; done
+while [ -L "$SELF" ]; do
+  SELF_DIR="$(cd "$(dirname "$SELF")" && pwd)"
+  SELF="$(readlink "$SELF")"
+  [[ "$SELF" != /* ]] && SELF="$SELF_DIR/$SELF"
+done
 TOLMOENV_ROOT="${TOLMOENV_ROOT:-$(cd "$(dirname "$SELF")/.." && pwd)}"
 export TOLMOENV_ROOT
 
