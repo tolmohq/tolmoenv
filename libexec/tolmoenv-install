@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$HOME/.tolmoenv}"
+source "$TOLMOENV_ROOT/lib/helpers.sh"
+
+[ "$#" -gt 1 ] && log_error "Expected 1 argument" "usage: tolmoenv install [<version>]"
+
+version_requested="${1:-""}"
+[ -n "$version_requested" ] || log_error "Version is not specified" "usage: tolmoenv install <version>"
+
+# Strip leading v
+version_requested="${version_requested#v}"
+
+# Resolve "latest" and "latest:nightly"
+if [ "$version_requested" = "latest" ]; then
+  version_requested="$(tolmoenv-list-remote --stable | tail -1)"
+  [ -n "$version_requested" ] || log_error "Could not determine latest stable version"
+  log_info "Resolved latest stable to $version_requested"
+elif [ "$version_requested" = "latest:nightly" ]; then
+  version_requested="$(tolmoenv-list-remote --nightly | tail -1)"
+  [ -n "$version_requested" ] || log_error "Could not determine latest nightly version"
+  log_info "Resolved latest nightly to $version_requested"
+fi
+
+# Check if already installed
+target_dir="$TOLMOENV_ROOT/versions/$version_requested"
+if [ -x "$target_dir/tolmo" ]; then
+  log_info "tolmo $version_requested is already installed"
+  exit 0
+fi
+
+os="$(detect_os)"
+arch="$(detect_arch)"
+
+# Determine tag and archive name
+if echo "$version_requested" | grep -q "nightly"; then
+  tag="v$version_requested"
+  archive_name="tolmo-nightly_${version_requested}_${os}_${arch}.tar.gz"
+else
+  tag="v$version_requested"
+  archive_name="tolmo_${version_requested}_${os}_${arch}.tar.gz"
+fi
+
+release_url="https://github.com/${TOLMOENV_REPO}/releases/download/${tag}"
+archive_url="${release_url}/${archive_name}"
+checksums_url="${release_url}/checksums.txt"
+
+log_info "Installing tolmo $version_requested ($os/$arch)..."
+
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "$tmpdir"' EXIT
+
+# Download checksums
+log_debug "Downloading checksums from $checksums_url"
+curl -fsSL -o "$tmpdir/checksums.txt" "$checksums_url" 2>/dev/null || true
+
+# Download archive
+log_info "Downloading $archive_name..."
+curl -fsSL -o "$tmpdir/$archive_name" "$archive_url" \
+  || log_error "Download failed. Is version $version_requested available for $os/$arch?"
+
+# Verify checksum
+expected="$(grep "${archive_name}$" "$tmpdir/checksums.txt" 2>/dev/null | cut -d' ' -f1 || true)"
+verify_checksum "$tmpdir/$archive_name" "$expected"
+
+# Extract and install
+log_debug "Extracting to $target_dir"
+mkdir -p "$target_dir"
+tar -xzf "$tmpdir/$archive_name" -C "$tmpdir"
+mv "$tmpdir/tolmo" "$target_dir/tolmo"
+chmod +x "$target_dir/tolmo"
+
+log_info "Installed tolmo $version_requested successfully"

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$HOME/.tolmoenv}"
+source "$TOLMOENV_ROOT/lib/helpers.sh"
+
+[ "$#" -gt 1 ] && log_error "Expected 1 argument" "usage: tolmoenv uninstall <version>"
+
+version="${1:-""}"
+[ -n "$version" ] || log_error "Version is not specified" "usage: tolmoenv uninstall <version>"
+
+# Strip leading v
+version="${version#v}"
+
+target_dir="$TOLMOENV_ROOT/versions/$version"
+
+if [ ! -d "$target_dir" ]; then
+  log_error "tolmo $version is not installed"
+fi
+
+rm -rf "$target_dir"
+log_info "Uninstalled tolmo $version"
+
+# Clear active version if it was the uninstalled one
+current="$(current_version)"
+if [ "$current" = "$version" ]; then
+  rm -f "$TOLMOENV_ROOT/version"
+  log_info "Active version cleared (was $version)"
+fi

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$HOME/.tolmoenv}"
+source "$TOLMOENV_ROOT/lib/helpers.sh"
+
+current="$(current_version)"
+
+versions_dir="$TOLMOENV_ROOT/versions"
+if [ ! -d "$versions_dir" ] || [ -z "$(ls -A "$versions_dir" 2>/dev/null)" ]; then
+  log_info "No versions installed. Run 'tolmoenv install <version>' to install one."
+  exit 0
+fi
+
+for dir in "$versions_dir"/*/; do
+  [ -d "$dir" ] || continue
+  version="$(basename "$dir")"
+  if [ "$version" = "$current" ]; then
+    echo "* $version (set by $(version_file))"
+  else
+    echo "  $version"
+  fi
+done

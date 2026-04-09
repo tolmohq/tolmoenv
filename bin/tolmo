@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Shim: resolves the active tolmo version and execs it.
+# Place this ahead of /usr/local/bin in your PATH.
+set -euo pipefail
+
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+
+# shellcheck source=../lib/helpers.sh
+source "$TOLMOENV_ROOT/lib/helpers.sh"
+
+version="$(current_version)"
+
+if [ -z "$version" ]; then
+  echo "No tolmo version selected. Run 'tolmoenv use <version>' or create a .tolmo-version file." >&2
+  exit 1
+fi
+
+binary="$TOLMOENV_ROOT/versions/$version/tolmo"
+
+if [ ! -x "$binary" ]; then
+  echo "tolmo $version is not installed. Run 'tolmoenv install $version' first." >&2
+  exit 1
+fi
+
+exec "$binary" "$@"

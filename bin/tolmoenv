@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+export TOLMOENV_ROOT
+
+# shellcheck source=../lib/helpers.sh
+source "$TOLMOENV_ROOT/lib/helpers.sh"
+
+command="${1:-""}"
+
+case "$command" in
+  install|use|uninstall|list|list-remote|version)
+    shift
+    exec "$TOLMOENV_ROOT/libexec/tolmoenv-$command" "$@"
+    ;;
+  ""|help|-h|--help)
+    cat <<EOF
+Usage: tolmoenv <command> [<args>]
+
+Commands:
+  install <version>    Install a specific version (e.g. 0.3.0, latest, latest:nightly)
+  use <version>        Switch the active version
+  uninstall <version>  Remove an installed version
+  list                 List installed versions
+  list-remote          List available versions from GitHub
+  version              Show tolmoenv version
+
+EOF
+    ;;
+  *)
+    echo "Unknown command: $command" >&2
+    echo "Run 'tolmoenv help' for usage" >&2
+    exit 1
+    ;;
+esac

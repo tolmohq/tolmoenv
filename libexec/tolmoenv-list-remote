@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$HOME/.tolmoenv}"
+source "$TOLMOENV_ROOT/lib/helpers.sh"
+
+filter="all"
+for arg in "$@"; do
+  case "$arg" in
+    --stable)  filter="stable" ;;
+    --nightly) filter="nightly" ;;
+    --all)     filter="all" ;;
+    --help|-h)
+      echo "Usage: tolmoenv list-remote [--stable|--nightly|--all]"
+      exit 0
+      ;;
+    *)
+      log_error "Unknown option: $arg" "usage: tolmoenv list-remote [--stable|--nightly|--all]"
+      ;;
+  esac
+done
+
+log_debug "Fetching releases from GitHub (filter: $filter)..."
+
+# Fetch all releases (including pre-releases) from GitHub API
+releases="$(curl -fsSL "https://api.github.com/repos/${TOLMOENV_REPO}/releases?per_page=100" \
+  | grep -o '"tag_name":"[^"]*"' \
+  | cut -d'"' -f4 \
+  | sed 's/^v//')"
+
+if [ -z "$releases" ]; then
+  log_error "Could not fetch releases from GitHub"
+fi
+
+case "$filter" in
+  stable)
+    echo "$releases" | grep -v "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n
+    ;;
+  nightly)
+    echo "$releases" | grep "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n
+    ;;
+  all)
+    # Stable first, then nightly
+    stable="$(echo "$releases" | grep -v "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n)"
+    nightly="$(echo "$releases" | grep "nightly" | sort -t'.' -k1,1n -k2,2n -k3,3n)"
+    [ -n "$stable" ] && echo "$stable"
+    [ -n "$nightly" ] && echo "$nightly"
+    ;;
+esac
