@@ -6,7 +6,9 @@ class Tolmoenv < Formula
   head "https://github.com/tolmohq/tolmoenv.git", branch: "main"
 
   def install
-    prefix.install "bin", "lib", "libexec"
+    libexec.install Dir["*"]
+    bin.install_symlink libexec/"bin/tolmo"
+    bin.install_symlink libexec/"bin/tolmoenv"
   end
 
   test do

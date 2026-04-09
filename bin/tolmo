@@ -3,7 +3,9 @@
 # Place this ahead of /usr/local/bin in your PATH.
 set -euo pipefail
 
-TOLMOENV_ROOT="${TOLMOENV_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+SELF="${BASH_SOURCE[0]}"
+while [ -L "$SELF" ]; do SELF="$(readlink "$SELF")"; done
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$(cd "$(dirname "$SELF")/.." && pwd)}"
 
 # shellcheck source=../lib/helpers.sh
 source "$TOLMOENV_ROOT/lib/helpers.sh"

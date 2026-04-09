@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TOLMOENV_ROOT="${TOLMOENV_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+SELF="${BASH_SOURCE[0]}"
+while [ -L "$SELF" ]; do SELF="$(readlink "$SELF")"; done
+TOLMOENV_ROOT="${TOLMOENV_ROOT:-$(cd "$(dirname "$SELF")/.." && pwd)}"
 export TOLMOENV_ROOT
 
 # shellcheck source=../lib/helpers.sh
