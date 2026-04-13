@@ -61,6 +61,16 @@ verify_checksum() {
   log_debug "Checksum verified: $actual"
 }
 
+run_tolmoenv_subcommand() {
+  local name="$1"
+  shift
+
+  local subcommand="$TOLMOENV_ROOT/libexec/tolmoenv-$name"
+  [ -x "$subcommand" ] || log_error "Subcommand not found: $name"
+
+  "$subcommand" "$@"
+}
+
 version_file() {
   local dir="$PWD"
   while [ "$dir" != "/" ]; do

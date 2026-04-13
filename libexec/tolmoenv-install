@@ -14,11 +14,11 @@ version_requested="${version_requested#v}"
 
 # Resolve "latest" and "latest:nightly"
 if [ "$version_requested" = "latest" ]; then
-  version_requested="$(tolmoenv-list-remote --stable | tail -1)"
+  version_requested="$(run_tolmoenv_subcommand list-remote --stable | tail -1)"
   [ -n "$version_requested" ] || log_error "Could not determine latest stable version"
   log_info "Resolved latest stable to $version_requested"
 elif [ "$version_requested" = "latest:nightly" ]; then
-  version_requested="$(tolmoenv-list-remote --nightly | tail -1)"
+  version_requested="$(run_tolmoenv_subcommand list-remote --nightly | tail -1)"
   [ -n "$version_requested" ] || log_error "Could not determine latest nightly version"
   log_info "Resolved latest nightly to $version_requested"
 fi
