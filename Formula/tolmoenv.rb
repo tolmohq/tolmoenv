@@ -5,6 +5,8 @@ class Tolmoenv < Formula
   sha256 "33ee55573b9f4c93544568ef91b7dfc5fbf2c5c50caa8069807a20da461c16fc"
   head "https://github.com/tolmohq/tolmoenv.git", branch: "main"
 
+  conflicts_with "tolmo", because: "tolmoenv symlinks tolmo binaries"
+
   def install
     libexec.install Dir["*"]
     bin.install_symlink libexec/"bin/tolmo"
